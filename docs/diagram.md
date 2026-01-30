@@ -1,4 +1,3 @@
-
 # BPU v2.9b-r1 — Data Stability Under Pressure (Flow Diagram)
 
 This diagram illustrates the high-level runtime flow of  
@@ -50,6 +49,7 @@ flowchart LR
     DROP --> STATS
     BACK --> STATS
 
+
 ```
 ## How to read this diagram
 
@@ -58,12 +58,17 @@ flowchart LR
 - Drops and backpressure are **explicitly counted**
 - Recovery paths rejoin the main queue flow
 
-Cross-reference
+This diagram matches:
+- counters in `stats.md`
+- scenarios in `log_samples.md`
 
-This diagram directly corresponds to:
+- ## Diagram intent
 
-Runtime counters described in docs/stats.md
+This diagram illustrates how BPU maintains data stability
+under TX backpressure and budget pressure by:
 
-Observed execution scenarios in docs/log_samples.md
+- Explicitly modeling backpressure paths
+- Applying budget-based degradation
+- Preserving high-priority data
+- Making all decisions observable via runtime counters
 
-Together, these documents describe a single validated runtime model.
