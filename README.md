@@ -1,57 +1,84 @@
-# BPU v2.9b-r1
+> **BPU (Batch Processing Unit)** is a small embedded scheduling core designed to
+> keep outgoing data stable under pressure.
+>
+> It focuses on **runtime behavior**, not API completeness:
+> backpressure handling, budget-based degradation, and observable recovery.
 
-**BPU (Binary Perception Unit)** is a lightweight, perception-oriented data pipeline
-designed for low-power embedded devices such as ESP32-class MCUs.
 
-This repository contains **v2.9b-r1**, a stable Arduino demo implementation.
+# BPU v2.9b-r1 — Dual UART Demo (ESP32)
+## Documentation
+- [Design notes](docs/design_notes.md) — core scheduler, backpressure, degradation strategy
+- [Runtime log samples](docs/log_samples.md) — real ESP32 logs with interpretation
+- [Runtime statistics](docs/stats.md) — observability counters and pressure signals
+- [Data stability flow diagram](docs/diagram.md) — high-level data flow under pressure
 
----
 
-## What problem does this solve?
 
-Typical embedded pipelines focus on raw data throughput.
-BPU instead focuses on **what the receiver can meaningfully perceive** under constraints:
+BPU is a small embedded scheduling core that keeps outgoing data stable under:
+- **Budget pressure** (bytes-per-tick limit)
+- **TX backpressure** (UART TX buffer not ready)
 
-- Limited bandwidth
-- Small buffers
-- Partial updates
-- Human-perceptual latency tolerance
+This repository includes a **dual-UART demo**:
+- `Serial` (USB, 115200): human-readable logs
+- `Serial1` (UART, 921600): binary frames (COBS + CRC16)
 
-BPU prioritizes *perceptual freshness* over strict completeness.
+- Runtime behavior is observable via explicit counters (`stats.md`) and validated with real logs.
 
----
 
-## Key ideas in this version
+## What this demo proves
+- When budget is insufficient → jobs are requeued, low-priority jobs may drop (TELEM), stats show `skipB`, `degrade_*`.
+- When TX is blocked → jobs requeue, stats show `skipTX`, queue growth and recovery.
+- Coalescing keeps only the newest of certain event types.
 
-- Event → Job pipeline separation
-- Coalescing of redundant events
-- Per-tick TX budget enforcement
-- Graceful degradation under congestion
-- Deterministic, inspectable behavior (debug counters)
+## Hardware
+ESP32-WROOM
+- Serial1 TX: GPIO17
+- Serial1 RX: GPIO16 (unused)
 
-This is **not a library**, but a **reference architecture**.
+## When to use BPU
 
----
+BPU is useful when:
 
-## File
+- You must **never block producers**, even when output is slow
+- Output bandwidth is limited or bursty (UART, BLE, radio)
+- Some data is **more important than others**
+- You want **observable, explainable drops**, not silent failure
 
-- `bpu_v2_9b_r1.ino`  
-  Final Arduino demo for ESP32 (Dual UART, perceptual scheduling)
+Typical targets:
+- ESP32 / MCU telemetry pipelines
+- Dual-UART or UART + BLE systems
+- Sensor aggregation under bandwidth limits
 
----
+## What BPU is NOT
 
-## Status
+- Not a general-purpose RTOS scheduler
+- Not a message queue library
+- Not a finalized public API
 
-This version is considered **stable** and used as a reference
-for rebuilding the PTE (Perceptual Transport Engine) golden code.
+This repository represents a **validated engine snapshot**
+focused on behavior under pressure.
 
----
+## How to validate this demo
 
-## Golden Reference
+1. Build and upload the firmware to ESP32-WROOM
+2. Open USB Serial Monitor at 115200 baud
+3. Observe runtime logs during:
+   - normal operation
+   - UART TX blocking
+   - budget pressure (high event rate)
+4. Compare observed logs with:
+   - `docs/log_samples.md`
+   - `docs/stats.md`
+   - `docs/diagram.md`
 
-This implementation (**v2.9b-r1**) is designated as the **Golden Reference**
-for BPU behavior.
 
-All future refactors, optimizations, or transports (including PTE)
-must preserve the perceptual guarantees demonstrated by this version.
+## Build & Run
+1. Open the `.ino` in Arduino IDE
+2. Select **ESP32 Dev Module** (or your target WROOM board)
+3. Upload and open Serial Monitor at **115200**
 
+## Frame format (OUT)
+`0x00` delimiter + `COBS( [0xB2, type, seq, len, payload..., crc16] )`
+
+## License
+TBD (will be set to MIT)
