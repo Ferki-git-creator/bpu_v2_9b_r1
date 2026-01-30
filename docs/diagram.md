@@ -57,7 +57,7 @@ flowchart LR
 - Drops and backpressure are **explicitly counted**
 - Recovery paths rejoin the main queue flow
 
-Cross-reference
+##Cross-reference
 
 This diagram directly corresponds to:
 
