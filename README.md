@@ -44,3 +44,14 @@ This is **not a library**, but a **reference architecture**.
 
 This version is considered **stable** and used as a reference
 for rebuilding the PTE (Perceptual Transport Engine) golden code.
+
+---
+
+## Golden Reference
+
+This implementation (**v2.9b-r1**) is designated as the **Golden Reference**
+for BPU behavior.
+
+All future refactors, optimizations, or transports (including PTE)
+must preserve the perceptual guarantees demonstrated by this version.
+
