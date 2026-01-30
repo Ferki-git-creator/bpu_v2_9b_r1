@@ -57,13 +57,13 @@ flowchart LR
 - Drops and backpressure are **explicitly counted**
 - Recovery paths rejoin the main queue flow
 
-##Cross-reference
+## Cross-reference
 
-This diagram directly corresponds to:
+- This diagram directly corresponds to:
 
-Runtime counters described in docs/stats.md
+- Runtime counters described in docs/stats.md
 
-Observed execution scenarios in docs/log_samples.md
+- Observed execution scenarios in docs/log_samples.md
 
-Together, these documents describe a single validated runtime model.
+- Together, these documents describe a single validated runtime model.
 
